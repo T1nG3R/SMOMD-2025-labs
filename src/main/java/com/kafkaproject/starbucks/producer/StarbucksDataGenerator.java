@@ -28,10 +28,10 @@ public class StarbucksDataGenerator {
 
         String size = product.getSize();
         double sizeFactor = switch (size) {
-            case "Short" -> 0.7;
-            case "Tall" -> 1.0;
-            case "Grande" -> 1.3;
-            case "Venti" -> 1.6;
+            case "short" -> 0.7;
+            case "tall" -> 1.0;
+            case "grande" -> 1.3;
+            case "venti" -> 1.6;
             default -> 0;
         };
 
