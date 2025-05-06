@@ -38,6 +38,8 @@ public class StarbucksWindowProcessor {
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
+        props.put(StreamsConfig.METRIC_REPORTER_CLASSES_CONFIG, ProducerMonitoring.class.getName());
+
         StreamsBuilder builder = new StreamsBuilder();
 
         // Обробляємо дані Debezium з БД
@@ -79,12 +81,14 @@ public class StarbucksWindowProcessor {
                 .toStream()
                 .to(HIGH_CALORIE_COUNT_TOPIC + "-hopping", Produced.with(timeWindowedSerde, Serdes.Long()));
 
+        // 3. Ковзні вікна (sliding windows)
         groupedStream
                 .windowedBy(SlidingWindows.ofTimeDifferenceWithNoGrace(Duration.ofSeconds(10)))
                 .count(Materialized.as(HIGH_CALORIE_STORE + "-sliding"))
                 .toStream()
                 .to(HIGH_CALORIE_COUNT_TOPIC + "-sliding", Produced.with(timeWindowedSerde, Serdes.Long()));
 
+        // 4. Вікна-сесії
         groupedStream
                 .windowedBy(SessionWindows.ofInactivityGapWithNoGrace(Duration.ofSeconds(10)))
                 .count(Materialized.as(HIGH_CALORIE_STORE + "-session"))
